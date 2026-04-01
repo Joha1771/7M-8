@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import axiosInstance from "../Config/axios";
 import { AuthProvider, ProtectedRoute } from "../context/AuthContext";
 import { Sidebar } from "../components/Sidebar";
-import { DashboardPage } from "./Admin/DashboardPage";
+import { DashboardPage } from "./Admin/Dashboard";
 import { OrdersPage } from "./Admin/OrdersPage";
 import { I18nProvider } from "../i18n";
 import { ProductsAdminPage } from "./Admin/ProductsAdminPage";
