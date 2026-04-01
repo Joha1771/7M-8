@@ -3,7 +3,6 @@ import axiosInstance from "../config/axios";
 import { AuthProvider, ProtectedRoute } from "../context/AuthContext";
 import { Sidebar } from "../components/Sidebar";
 import { DashboardPage } from "./Admin/DashboardPage";
-import { ProductsPage } from "./ProductsPage";
 import { OrdersPage } from "./Admin/OrdersPage";
 import { I18nProvider } from "../i18n";
 import { ProductsAdminPage } from "./Admin/ProductsAdminPage";
