@@ -172,4 +172,4 @@ function DashboardPage({ products, orders }) {
   );
 }
 
-export default DashboardPage;
+export { DashboardPage };
