@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import axiosInstance from "../config/axios";
+import axiosInstance from "../Config/axios";
 import { AuthProvider, ProtectedRoute } from "../context/AuthContext";
 import { Sidebar } from "../components/Sidebar";
 import { DashboardPage } from "./Admin/DashboardPage";

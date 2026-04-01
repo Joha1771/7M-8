@@ -3,7 +3,7 @@ import { ProductCard } from "./ProductCard";
 import { HeroBanner } from "./HeroBanner";
 import { Loader } from "./Loader";
 import { useTranslation } from "../i18n/index";
-import axiosInstance from "../config/axios";
+import axiosInstance from "../Config/axios";
 
 export function ProductsPage() {
   const { t } = useTranslation();

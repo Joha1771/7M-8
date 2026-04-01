@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Loader } from "./Loader";
 import { useTranslation } from "../i18n/index";
-import axiosInstance from "../config/axios";
+import axiosInstance from "../Config/axios";
 
 export function ProductDetail() {
   const { id } = useParams();
