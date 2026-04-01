@@ -1,5 +1,5 @@
 import { useState } from "react";
-import axiosInstance from "../../config/axios";
+import axiosInstance from "../../Config/axios";
 import { Icon } from "../../components/icons";
 import { StatusBadge, inputStyle } from "../../components/ui";
 

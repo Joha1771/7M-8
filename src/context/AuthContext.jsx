@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useState } from "react";
-import { LoginPage } from "../pages/Admin/LoginPage";
+import { LoginPage } from "../pages/Admin/LogInPage";
 
 export const AuthContext = createContext(null);
 
