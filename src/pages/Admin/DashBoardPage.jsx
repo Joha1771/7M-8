@@ -1,6 +1,6 @@
 import { StatCard, StatusBadge } from "../../components/ui";
 
-export function DashboardPage({ products, orders }) {
+function DashboardPage({ products, orders }) {
   const pending = orders.filter((o) => o.status === "pending").length;
   const delivered = orders.filter((o) => o.status === "delivered").length;
   const revenue = orders
@@ -171,3 +171,5 @@ export function DashboardPage({ products, orders }) {
     </div>
   );
 }
+
+export default DashboardPage;
