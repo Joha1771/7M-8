@@ -5,16 +5,16 @@ import { Modal, Field, inputStyle } from "../../components/ui";
 
 export function ProductsAdminPage({ products, loading, onRefresh }) {
   const [search, setSearch] = useState("");
-  const [modal, setModal] = useState(null); // null | "create" | {product}
+  const [modal, setModal] = useState(null);
   const [form, setForm] = useState({
     name: "",
     category: "",
     price: "",
     stock: "",
     description: "",
+    rating: "",
+    imageUrl: "",
   });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState("");
   const [deleteId, setDeleteId] = useState(null);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -27,9 +27,15 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
   );
 
   const openCreate = () => {
-    setForm({ name: "", category: "", price: "", stock: "", description: "" });
-    setImageFile(null);
-    setImagePreview("");
+    setForm({
+      name: "",
+      category: "",
+      price: "",
+      stock: "",
+      description: "",
+      rating: "",
+      imageUrl: "",
+    });
     setModal("create");
   };
 
@@ -40,17 +46,10 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
       price: p.price ?? "",
       stock: p.stock ?? "",
       description: p.description ?? "",
+      rating: p.rating ?? "",
+      imageUrl: p.image ?? "",
     });
-    setImageFile(null);
-    setImagePreview(p.image ?? "");
     setModal(p);
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
   };
 
   const handleSave = async () => {
@@ -63,16 +62,13 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
       fd.append("price", form.price);
       fd.append("stock", form.stock);
       fd.append("description", form.description);
-      if (imageFile) fd.append("image", imageFile);
+      fd.append("rating", form.rating || "0");
+      fd.append("imageUrl", form.imageUrl);
 
       if (modal === "create") {
-        await axiosInstance.post("/products", fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await axiosInstance.post("/products", fd);
       } else {
-        await axiosInstance.put(`/products/${modal.id}`, fd, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await axiosInstance.patch(`/products/${modal.id}`, fd);
       }
       await onRefresh();
       setModal(null);
@@ -260,7 +256,7 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
                       {p.image ? (
                         <img
                           src={p.image}
-                          alt={p.title}
+                          alt={p.name}
                           style={{
                             width: 36,
                             height: 36,
@@ -377,126 +373,42 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
           title={modal === "create" ? "New Product" : "Edit Product"}
           onClose={() => setModal(null)}
         >
-          <Field label="Image">
-            <label
+          {/* Image URL + Preview */}
+          <Field label="Image URL">
+            <input
+              className="admin-input"
+              style={inputStyle}
+              placeholder="https://example.com/image.jpg"
+              value={form.imageUrl}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, imageUrl: e.target.value }))
+              }
+            />
+          </Field>
+          {form.imageUrl && (
+            <div
               style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                justifyContent: "center",
-                border: "1px dashed rgba(255,255,255,0.15)",
-                cursor: "pointer",
+                marginBottom: 14,
+                border: "1px solid rgba(255,255,255,0.08)",
+                padding: 8,
                 background: "rgba(255,255,255,0.02)",
-                position: "relative",
-                height: imagePreview ? "auto" : 100,
-                overflow: "hidden",
-                transition: "border-color 0.2s",
               }}
-              onMouseEnter={(e) =>
-                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.35)")
-              }
-              onMouseLeave={(e) =>
-                (e.currentTarget.style.borderColor = "rgba(255,255,255,0.15)")
-              }
             >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
+              <img
+                src={form.imageUrl}
+                alt="preview"
                 style={{
-                  position: "absolute",
-                  inset: 0,
-                  opacity: 0,
-                  cursor: "pointer",
                   width: "100%",
-                  height: "100%",
+                  maxHeight: 140,
+                  objectFit: "contain",
+                  display: "block",
+                }}
+                onError={(e) => {
+                  e.target.style.display = "none";
                 }}
               />
-              {imagePreview ? (
-                <div style={{ position: "relative", width: "100%" }}>
-                  <img
-                    src={imagePreview}
-                    alt="preview"
-                    style={{
-                      width: "100%",
-                      maxHeight: 160,
-                      objectFit: "contain",
-                      display: "block",
-                      padding: "8px",
-                      boxSizing: "border-box",
-                    }}
-                  />
-                  <div
-                    style={{
-                      position: "absolute",
-                      inset: 0,
-                      background: "rgba(0,0,0,0.5)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      opacity: 0,
-                      transition: "opacity 0.2s",
-                      fontFamily: "'DM Mono', monospace",
-                      fontSize: 10,
-                      color: "#fff",
-                      letterSpacing: "0.1em",
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.opacity = 1)}
-                    onMouseLeave={(e) => (e.currentTarget.style.opacity = 0)}
-                  >
-                    CHANGE IMAGE
-                  </div>
-                </div>
-              ) : (
-                <div
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: 6,
-                    pointerEvents: "none",
-                  }}
-                >
-                  <svg
-                    width="20"
-                    height="20"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="rgba(255,255,255,0.25)"
-                    strokeWidth={1.5}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-                    <polyline points="17 8 12 3 7 8" />
-                    <line x1="12" y1="3" x2="12" y2="15" />
-                  </svg>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      color: "rgba(255,255,255,0.25)",
-                      fontFamily: "'DM Mono', monospace",
-                      letterSpacing: "0.1em",
-                    }}
-                  >
-                    CLICK TO UPLOAD
-                  </span>
-                </div>
-              )}
-            </label>
-            {imageFile && (
-              <p
-                style={{
-                  margin: "4px 0 0",
-                  fontSize: 10,
-                  color: "rgba(255,255,255,0.3)",
-                  fontFamily: "'DM Mono', monospace",
-                }}
-              >
-                {imageFile.name}
-              </p>
-            )}
-          </Field>
+            </div>
+          )}
 
           <Field label="Name">
             <input
@@ -530,7 +442,11 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
             />
           </Field>
           <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr 1fr",
+              gap: 12,
+            }}
           >
             <Field label="Price ($)">
               <input
@@ -553,6 +469,21 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
                 value={form.stock}
                 onChange={(e) =>
                   setForm((p) => ({ ...p, stock: e.target.value }))
+                }
+              />
+            </Field>
+            <Field label="Rating (0-5)">
+              <input
+                className="admin-input"
+                style={inputStyle}
+                type="number"
+                placeholder="4.5"
+                min="0"
+                max="5"
+                step="0.1"
+                value={form.rating}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, rating: e.target.value }))
                 }
               />
             </Field>
