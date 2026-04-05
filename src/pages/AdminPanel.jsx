@@ -1,42 +1,17 @@
-import { useState, useEffect, useCallback } from "react";
-import axiosInstance from "../Config/axios";
-import { AuthProvider, ProtectedRoute } from "../context/AuthContext";
+import { useEffect } from "react";
+import { useAdminStore } from "../store/useAdminStore";
+import { useAuthStore } from "../store/useAuthStore";
 import { Sidebar } from "../components/Sidebar";
 import { DashboardPage } from "./Admin/Dashboard";
 import { OrdersPage } from "./Admin/OrdersPage";
-import { I18nProvider } from "../i18n";
 import { ProductsAdminPage } from "./Admin/ProductsAdminPage";
+import { LoginPage } from "./Admin/LogInPage";
+import { I18nProvider } from "../i18n";
+import { useState } from "react";
 
 function AdminPanel() {
   const [page, setPage] = useState("dashboard");
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [loadingProducts, setLoadingProducts] = useState(true);
-  const [loadingOrders, setLoadingOrders] = useState(true);
-
-  const fetchProducts = useCallback(async () => {
-    try {
-      setLoadingProducts(true);
-      const res = await axiosInstance.get("/products");
-      setProducts(Array.isArray(res.data) ? res.data : (res.data.data ?? []));
-    } catch (err) {
-      console.error("Failed to fetch products:", err);
-    } finally {
-      setLoadingProducts(false);
-    }
-  }, []);
-
-  const fetchOrders = useCallback(async () => {
-    try {
-      setLoadingOrders(true);
-      const res = await axiosInstance.get("/orders");
-      setOrders(Array.isArray(res.data) ? res.data : (res.data.data ?? []));
-    } catch (err) {
-      console.error("Failed to fetch orders:", err);
-    } finally {
-      setLoadingOrders(false);
-    }
-  }, []);
+  const { fetchProducts, fetchOrders } = useAdminStore();
 
   useEffect(() => {
     fetchProducts();
@@ -62,38 +37,27 @@ function AdminPanel() {
       <Sidebar page={page} setPage={setPage} />
 
       <main style={{ flex: 1, overflowY: "auto", padding: "36px 40px" }}>
-        {page === "dashboard" && (
-          <DashboardPage products={products} orders={orders} />
-        )}
-        {page === "products" && (
-          <ProductsAdminPage
-            products={products}
-            setProducts={setProducts}
-            loading={loadingProducts}
-            onRefresh={fetchProducts}
-          />
-        )}
-        {page === "orders" && (
-          <OrdersPage
-            orders={orders}
-            setOrders={setOrders}
-            loading={loadingOrders}
-            onRefresh={fetchOrders}
-          />
-        )}
+        {page === "dashboard" && <DashboardPage />}
+        {page === "products" && <ProductsAdminPage />}
+        {page === "orders" && <OrdersPage />}
       </main>
     </div>
   );
 }
 
+// Protected wrapper — checks zustand auth store directly
+function ProtectedRoute({ children }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (!isAuthenticated) return <LoginPage />;
+  return children;
+}
+
 export default function AdminApp() {
   return (
     <I18nProvider>
-      <AuthProvider>
-        <ProtectedRoute>
-          <AdminPanel />
-        </ProtectedRoute>
-      </AuthProvider>
+      <ProtectedRoute>
+        <AdminPanel />
+      </ProtectedRoute>
     </I18nProvider>
   );
 }

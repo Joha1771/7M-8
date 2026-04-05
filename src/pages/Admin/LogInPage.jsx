@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useAuth } from "../../context/AuthContext";
+import { useAuthStore } from "../../store/useAuthStore";
 import { Icon } from "../../components/icons";
 
 export function LoginPage() {
-  const { login } = useAuth();
+  const login = useAuthStore((s) => s.login);
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
@@ -37,7 +37,6 @@ export function LoginPage() {
         overflow: "hidden",
       }}
     >
-      {/* Grid background */}
       <div
         style={{
           position: "absolute",
@@ -47,8 +46,6 @@ export function LoginPage() {
           backgroundSize: "40px 40px",
         }}
       />
-
-      {/* Glow */}
       <div
         style={{
           position: "absolute",
@@ -76,31 +73,14 @@ export function LoginPage() {
         }}
       >
         <style>{`
-          @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes shake {
-            0%,100% { transform: translateX(0); }
-            20% { transform: translateX(-8px); }
-            40% { transform: translateX(8px); }
-            60% { transform: translateX(-5px); }
-            80% { transform: translateX(5px); }
-          }
-          @keyframes spin { to { transform: rotate(360deg); } }
-          .login-input {
-            width: 100%; box-sizing: border-box;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.1);
-            color: #fff; font-family: inherit; font-size: 13px;
-            padding: 12px 16px; outline: none;
-            transition: border-color 0.2s, background 0.2s;
-          }
-          .login-input:focus { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.07); }
-          .login-input::placeholder { color: rgba(255,255,255,0.25); }
+          @keyframes fadeUp { from { opacity:0; transform:translateY(20px); } to { opacity:1; transform:translateY(0); } }
+          @keyframes shake { 0%,100%{transform:translateX(0);} 20%{transform:translateX(-8px);} 40%{transform:translateX(8px);} 60%{transform:translateX(-5px);} 80%{transform:translateX(5px);} }
+          @keyframes spin { to{transform:rotate(360deg);} }
+          .login-input { width:100%;box-sizing:border-box;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:#fff;font-family:inherit;font-size:13px;padding:12px 16px;outline:none;transition:border-color 0.2s,background 0.2s; }
+          .login-input:focus { border-color:rgba(255,255,255,0.4);background:rgba(255,255,255,0.07); }
+          .login-input::placeholder { color:rgba(255,255,255,0.25); }
         `}</style>
 
-        {/* Brand */}
         <div style={{ textAlign: "center", marginBottom: 40 }}>
           <div
             style={{

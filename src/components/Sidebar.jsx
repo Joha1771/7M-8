@@ -1,8 +1,10 @@
-import { useAuth } from "../context/AuthContext";
+import { useAuthStore } from "../store/useAuthStore";
 import { Icon } from "../components/icons";
 
 export function Sidebar({ page, setPage }) {
-  const { admin, logout } = useAuth();
+  const admin = useAuthStore((s) => s.admin);
+  const logout = useAuthStore((s) => s.logout);
+
   const nav = [
     { id: "dashboard", label: "Dashboard", icon: Icon.dashboard },
     { id: "products", label: "Products", icon: Icon.products },

@@ -1,9 +1,13 @@
 import { useState } from "react";
-import axiosInstance from "../../Config/axios";
+import { useAdminStore } from "../../store/useAdminStore";
 import { Icon } from "../../components/icons";
 import { StatusBadge, inputStyle } from "../../components/ui";
 
-export function OrdersPage({ orders, loading, onRefresh }) {
+export function OrdersPage() {
+  const orders = useAdminStore((s) => s.orders);
+  const loadingOrders = useAdminStore((s) => s.loadingOrders);
+  const updateOrderStatus = useAdminStore((s) => s.updateOrderStatus);
+
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [updating, setUpdating] = useState(null);
@@ -17,11 +21,10 @@ export function OrdersPage({ orders, loading, onRefresh }) {
     return matchSearch && matchFilter;
   });
 
-  const updateStatus = async (id, status) => {
+  const handleUpdateStatus = async (id, status) => {
     setUpdating(id);
     try {
-      await axiosInstance.patch(`/orders/${id}`, { status });
-      await onRefresh();
+      await updateOrderStatus(id, status);
     } catch (err) {
       console.error("Status update failed:", err);
     } finally {
@@ -63,7 +66,6 @@ export function OrdersPage({ orders, loading, onRefresh }) {
         </p>
       </div>
 
-      {/* Filters + Search */}
       <div style={{ display: "flex", gap: 4, marginBottom: 16 }}>
         {tabs.map((tab) => (
           <button
@@ -120,14 +122,13 @@ export function OrdersPage({ orders, loading, onRefresh }) {
         </div>
       </div>
 
-      {/* Table */}
       <div
         style={{
           border: "1px solid rgba(255,255,255,0.07)",
           background: "#111",
         }}
       >
-        {loading ? (
+        {loadingOrders ? (
           <div
             style={{
               padding: 40,
@@ -263,7 +264,9 @@ export function OrdersPage({ orders, loading, onRefresh }) {
                       {order.status === "pending" && (
                         <>
                           <button
-                            onClick={() => updateStatus(order.id, "delivered")}
+                            onClick={() =>
+                              handleUpdateStatus(order.id, "delivered")
+                            }
                             disabled={updating === order.id}
                             style={{
                               display: "flex",
@@ -300,7 +303,9 @@ export function OrdersPage({ orders, loading, onRefresh }) {
                             Delivered
                           </button>
                           <button
-                            onClick={() => updateStatus(order.id, "cancelled")}
+                            onClick={() =>
+                              handleUpdateStatus(order.id, "cancelled")
+                            }
                             disabled={updating === order.id}
                             style={{
                               display: "flex",
@@ -362,7 +367,6 @@ export function OrdersPage({ orders, loading, onRefresh }) {
                       textAlign: "center",
                       color: "rgba(255,255,255,0.2)",
                       fontSize: 12,
-                      fontFamily: "'DM Mono', monospace",
                     }}
                   >
                     No orders found

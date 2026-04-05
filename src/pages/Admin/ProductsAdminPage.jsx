@@ -1,9 +1,15 @@
 import { useState } from "react";
-import axiosInstance from "../../Config/axios";
+import { useAdminStore } from "../../store/useAdminStore";
 import { Icon } from "../../components/icons";
 import { Modal, Field, inputStyle } from "../../components/ui";
 
-export function ProductsAdminPage({ products, loading, onRefresh }) {
+export function ProductsAdminPage() {
+  const products = useAdminStore((s) => s.products);
+  const loadingProducts = useAdminStore((s) => s.loadingProducts);
+  const createProduct = useAdminStore((s) => s.createProduct);
+  const updateProduct = useAdminStore((s) => s.updateProduct);
+  const deleteProduct = useAdminStore((s) => s.deleteProduct);
+
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({
@@ -64,13 +70,11 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
       fd.append("description", form.description);
       fd.append("rating", form.rating || "0");
       fd.append("imageUrl", form.imageUrl);
-
       if (modal === "create") {
-        await axiosInstance.post("/products", fd);
+        await createProduct(fd);
       } else {
-        await axiosInstance.patch(`/products/${modal.id}`, fd);
+        await updateProduct(modal.id, fd);
       }
-      await onRefresh();
       setModal(null);
     } catch (err) {
       console.error("Save failed:", err);
@@ -82,8 +86,7 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
   const handleDelete = async () => {
     setDeleting(true);
     try {
-      await axiosInstance.delete(`/products/${deleteId}`);
-      await onRefresh();
+      await deleteProduct(deleteId);
       setDeleteId(null);
     } catch (err) {
       console.error("Delete failed:", err);
@@ -96,7 +99,6 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
     <div>
       <style>{`.admin-input:focus { border-color: rgba(255,255,255,0.35) !important; }`}</style>
 
-      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -151,7 +153,6 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
         </button>
       </div>
 
-      {/* Search */}
       <div style={{ position: "relative", marginBottom: 16 }}>
         <span
           style={{
@@ -178,14 +179,13 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
         />
       </div>
 
-      {/* Table */}
       <div
         style={{
           border: "1px solid rgba(255,255,255,0.07)",
           background: "#111",
         }}
       >
-        {loading ? (
+        {loadingProducts ? (
           <div
             style={{
               padding: 40,
@@ -244,10 +244,7 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
               {filtered.map((p) => (
                 <tr
                   key={p.id}
-                  style={{
-                    borderBottom: "1px solid rgba(255,255,255,0.04)",
-                    transition: "background 0.1s",
-                  }}
+                  style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
                 >
                   <td style={{ padding: "12px 16px" }}>
                     <div
@@ -355,7 +352,6 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
                       textAlign: "center",
                       color: "rgba(255,255,255,0.2)",
                       fontSize: 12,
-                      fontFamily: "'DM Mono', monospace",
                     }}
                   >
                     No products found
@@ -367,18 +363,16 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
         )}
       </div>
 
-      {/* Create / Edit Modal */}
       {modal !== null && (
         <Modal
           title={modal === "create" ? "New Product" : "Edit Product"}
           onClose={() => setModal(null)}
         >
-          {/* Image URL + Preview */}
           <Field label="Image URL">
             <input
               className="admin-input"
               style={inputStyle}
-              placeholder="https://example.com/image.jpg"
+              placeholder="https://..."
               value={form.imageUrl}
               onChange={(e) =>
                 setForm((p) => ({ ...p, imageUrl: e.target.value }))
@@ -409,7 +403,6 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
               />
             </div>
           )}
-
           <Field label="Name">
             <input
               className="admin-input"
@@ -488,7 +481,6 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
               />
             </Field>
           </div>
-
           <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
             <button
               onClick={() => setModal(null)}
@@ -544,7 +536,6 @@ export function ProductsAdminPage({ products, loading, onRefresh }) {
         </Modal>
       )}
 
-      {/* Delete confirm */}
       {deleteId && (
         <Modal title="Delete Product" onClose={() => setDeleteId(null)}>
           <p
